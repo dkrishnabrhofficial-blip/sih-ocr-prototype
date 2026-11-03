@@ -17,7 +17,6 @@ st.markdown("""
         color: #f8fafc;
         font-family: 'Inter', sans-serif;
     }
-    
     .glass-card {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(16px);
@@ -28,7 +27,6 @@ st.markdown("""
         margin-bottom: 20px;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
-    
     .main-title {
         font-size: 2.2rem;
         font-weight: 700;
@@ -37,13 +35,11 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         margin-bottom: 8px;
     }
-    
     .sub-title {
         color: #94a3b8;
         font-size: 1rem;
         margin-bottom: 24px;
     }
-
     .badge-success {
         background: rgba(34, 197, 94, 0.2);
         color: #4ade80;
@@ -52,7 +48,6 @@ st.markdown("""
         border-radius: 20px;
         font-weight: 600;
     }
-    
     .badge-warning {
         background: rgba(234, 179, 8, 0.2);
         color: #fde047;
@@ -61,13 +56,11 @@ st.markdown("""
         border-radius: 20px;
         font-weight: 600;
     }
-
     div[data-testid="stSidebar"] {
         background: rgba(15, 23, 42, 0.7);
         backdrop-filter: blur(12px);
         border-right: 1px solid rgba(255, 255, 255, 0.1);
     }
-
     .stButton>button {
         background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
         color: white;
@@ -75,13 +68,7 @@ st.markdown("""
         border-radius: 10px;
         padding: 10px 24px;
         font-weight: 600;
-        transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
-    }
-
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -92,11 +79,10 @@ st.markdown('<div class="sub-title">Problem Statement ID: SIH26262 | AI OCR & Au
 
 # Sidebar Navigation
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/shield-with-signature.png", width=70)
-    st.title("Navigation")
+    st.subheader("🛡️ AICTE Portal")
     page = st.radio("Select View", ["📄 Single Document Upload", "📊 AICTE Dashboard", "⚙️ Verification Rules"])
     st.markdown("---")
-    st.caption("🔒 Secured via End-to-End Hash Validation")
+    st.caption("Secured via End-to-End Hash Validation")
 
 # Session State Master Data
 if 'fdr_records' not in st.session_state:
@@ -110,61 +96,56 @@ if 'fdr_records' not in st.session_state:
 if page == "📄 Single Document Upload":
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.subheader("Upload Fixed Deposit Receipt (FDR)")
-    st.write("Upload scanned FDR certificate (PDF/Image) for instant automated OCR Extraction.")
+    st.write("Upload scanned FDR certificate for instant automated OCR Extraction.")
     
-    uploaded_file = st.file_uploader("Drag and drop FDR document here", type=['pdf', 'png', 'jpg', 'jpeg'])
+    uploaded_file = st.file_uploader("Upload document", type=['pdf', 'png', 'jpg', 'jpeg'])
     
     if uploaded_file is not None:
         st.info("🔄 Processing Document via OCR Extraction Engine...")
         
         col1, col2 = st.columns(2)
-        
         with col1:
             st.markdown("### Document Preview")
             if uploaded_file.type != "application/pdf":
                 st.image(uploaded_file, use_container_width=True)
             else:
-                st.success("PDF Document Received Successfully")
+                st.success("PDF Document Loaded Successfully")
                 
         with col2:
             st.markdown("### Extracted FDR Details")
             bank_name = st.text_input("Bank Name", "State Bank of India")
             fdr_no = st.text_input("FDR Number", "FDR-992384")
             amount = st.number_input("Amount (INR)", value=500000, step=50000)
-            issue_date = st.date_input("Issue Date", datetime.today() - timedelta(days=365))
             maturity_date = st.date_input("Maturity Date", datetime.today() + timedelta(days=730))
             
-            if amount >= 300000 and maturity_date > datetime.today().date():
+            if amount >= 300000:
                 st.markdown('Status: <span class="badge-success">VALIDATED</span>', unsafe_allow_html=True)
             else:
                 st.markdown('Status: <span class="badge-warning">REVIEW REQUIRED</span>', unsafe_allow_html=True)
                 
-            if st.button("Submit Record to AICTE Database"):
+            if st.button("Submit Record"):
                 st.session_state.fdr_records.append({
                     "Institution": "Uploaded Institute",
                     "FDR No": fdr_no,
                     "Bank": bank_name,
                     "Amount (₹)": amount,
                     "Expiry Date": str(maturity_date),
-                    "Status": "Verified" if amount >= 300000 else "Pending Review"
+                    "Status": "Verified"
                 })
                 st.success("✅ FDR Record successfully verified and saved!")
-                
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Page 2: Dashboard View
 elif page == "📊 AICTE Dashboard":
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.subheader("AICTE Central FDR Tracking & Monitoring")
-    
     df = pd.DataFrame(st.session_state.fdr_records)
     
     m1, m2, m3 = st.columns(3)
-    m1.metric("Total Submitted FDRs", len(df))
+    m1.metric("Total Submitted", len(df))
     m2.metric("Verified & Active", len(df[df['Status'] == 'Verified']))
     m3.metric("Action Required", len(df[df['Status'] != 'Verified']))
     
-    st.markdown("### Master Record Registry")
     st.dataframe(df, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -174,6 +155,5 @@ else:
     st.subheader("Automated Compliance & Alert Settings")
     st.slider("Minimum Required FDR Amount (₹)", 100000, 1000000, 300000)
     st.number_input("Expiry Alert Threshold (Days in advance)", value=30)
-    st.checkbox("Enable Automated Email Alerts to Colleges", value=True)
-    st.button("Save System Configuration")
+    st.button("Save Configuration")
     st.markdown('</div>', unsafe_allow_html=True)
